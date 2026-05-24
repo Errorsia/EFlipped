@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 // import 'dart:convert';
 import 'dart:io';
@@ -6,6 +8,7 @@ import 'cookie_utils.dart';
 class EHCookieManager {
   late final List<Cookie> dynamicCookies;
   late final _EHCookieInjector _cookieInjector;
+  Timer? _saveTimer;
 
   EHCookieManager() {
     // dynamicCookies will be loaded here
@@ -22,28 +25,18 @@ class EHCookieManager {
   // }
 
   void _updateCookies(List<Cookie> newCookies) {
+    // merge
     for (var c in newCookies) {
       dynamicCookies.removeWhere((old) => old.name == c.name);
       dynamicCookies.add(c);
     }
-    //  todo: store cookies
+
+    // delay in writing
+    _saveTimer?.cancel();
+    _saveTimer = Timer(Duration(seconds: 2), () {
+      // store cookies
+    });
   }
-
-  // Timer? _saveTimer;
-
-  // void _updateCookies(List<Cookie> newCookies) {
-  //   // merge
-  //   for (var c in newCookies) {
-  //     dynamicCookies.removeWhere((old) => old.name == c.name);
-  //     dynamicCookies.add(c);
-  //   }
-
-  //   // delay in writing
-  //   _saveTimer?.cancel();
-  //   _saveTimer = Timer(Duration(seconds: 1), () {
-  //     saveToDisk(dynamicCookies);
-  //   });
-  // }
 
 }
 
@@ -79,10 +72,13 @@ class _EHCookieInjector extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     try {
-      if (networkSetting.allHostAndIPs.contains(options.uri.host)) {
-        options.headers[HttpHeaders.cookieHeader] =
-            CookieUtils.safeCookieString(cookies);
-      }
+
+      // ip filter, but we dont need it
+      // if (networkSetting.allHostAndIPs.contains(options.uri.host)) {
+      //   options.headers[HttpHeaders.cookieHeader] =
+      //       CookieUtils.safeCookieString(cookies);
+      // }
+      options.headers[HttpHeaders.cookieHeader] = CookieUtils.safeCookieString(cookies);
       handler.next(options);
     } on Exception catch (e, stackTrace) {
       var err = DioException(
