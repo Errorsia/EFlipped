@@ -25,13 +25,18 @@ class EHCookieManager {
   // }
 
   Future<void> replaceCookies(List<Cookie> newCookies) async {
-    dynamicCookies.removeWhere(
-      (cookie) => newCookies.any((c) => c.name == cookie.name),
-    );
+    removeCookies(newCookies);
     dynamicCookies.addAll(newCookies);
   }
 
-  Future<void> removeCookies(List<String> cookieNames) async {
+  Future<void> removeCookies(List<Cookie> cookieNames) async {
+    dynamicCookies.removeWhere(
+      (cookie) => cookieNames.any((c) => c.name == cookie.name),
+    );
+  }
+
+  // For compatible uses
+  Future<void> removeCookiesInString(List<String> cookieNames) async {
     dynamicCookies.removeWhere(
       (cookie) => cookieNames.any((name) => cookie.name == name),
     );
