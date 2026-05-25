@@ -31,7 +31,7 @@ class EHCookieManager {
       dynamicCookies.add(c);
     }
 
-    // delay in writing
+    // delay 2s then storing the cookies
     _saveTimer?.cancel();
     _saveTimer = Timer(Duration(seconds: 2), () {
       // store cookies
@@ -56,18 +56,6 @@ class _EHCookieInjector extends Interceptor {
   );
 
   List<Cookie> get cookies => [...immutableCookies, ...dynamicCookies];
-
-  Future<void> initCookies() async {
-    // String? string = await localConfigService.read(
-    //   configKey: ConfigEnum.ehCookie,
-    // );
-    // if (string != null) {
-    //   List list = jsonDecode(string);
-    //   cookies.addAll(
-    //     list.cast<String>().map(Cookie.fromSetCookieValue).toList(),
-    //   );
-    // }
-  }
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
